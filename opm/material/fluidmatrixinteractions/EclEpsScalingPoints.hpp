@@ -183,13 +183,19 @@ struct EclEpsScalingPointsInfo
                          int satRegionIdx)
     {
         // TODO: support for SOF2, SLGOF, SGWFN and 2d tables
+        const std::vector<SwofTable>& swofTables = eclState->getSwofTables();
+        const std::vector<SgofTable>& sgofTables = eclState->getSgofTables();
+        const std::vector<SwfnTable>& swfnTables = eclState->getSwfnTables();
+        const std::vector<SgfnTable>& sgfnTables = eclState->getSgfnTables();
+        const std::vector<Sof3Table>& sof3Tables = eclState->getSof3Tables();
 
-        size_t saturationFunctionFamily = eclState->getSaturationFunctionFamily();
-        switch (saturationFunctionFamily) {
-        case 1:
+        bool family1 = !sgofTables.empty() && !swofTables.empty();
+        bool family2 = !swfnTables.empty() && !sgfnTables.empty() && !sof3Tables.empty();
+
+        if (family1)
         {
-            const auto& swofTable = eclState->getSwofTables()[satRegionIdx];
-            const auto& sgofTable = eclState->getSgofTables()[satRegionIdx];
+            const auto& swofTable = swofTables[satRegionIdx];
+            const auto& sgofTable = sgofTables[satRegionIdx];
 
             // connate saturations
             Swl = swofTable.getSwColumn().front();
@@ -249,13 +255,12 @@ struct EclEpsScalingPointsInfo
 
             maxKrg = sgofTable.getKrgColumn().back();
             maxKrog = sgofTable.getKrogColumn().front();
-            break;
         }
-        case 2:
+        else if (family2)
         {
-            const auto& swfnTable = eclState->getSwfnTables()[satRegionIdx];
-            const auto& sof3Table = eclState->getSof3Tables()[satRegionIdx];
-            const auto& sgfnTable = eclState->getSgfnTables()[satRegionIdx];
+            const auto& swfnTable = swfnTables[satRegionIdx];
+            const auto& sof3Table = sof3Tables[satRegionIdx];
+            const auto& sgfnTable = sgfnTables[satRegionIdx];
 
             // connate saturations
             Swl = swfnTable.getSwColumn().front();
@@ -318,8 +323,8 @@ struct EclEpsScalingPointsInfo
 
             assert(maxKrw == maxKrg);
 
-            break;
-        }
+        } else {
+            throw std::domain_error("No valid saturation keyword family specified");
         }
 
     }
