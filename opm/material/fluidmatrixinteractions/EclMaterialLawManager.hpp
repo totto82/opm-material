@@ -602,15 +602,24 @@ private:
             const auto& sgfnTable = eclState->getSgfnTables()[satnumRegionIdx];
             const auto& sof3Table = eclState->getSof3Tables()[satnumRegionIdx];
 
-            const auto &SoColumn = sof3Table.getSoColumn();
-            // convert the saturations of the SGFN keyword from gas to oil saturations
-            std::vector<double> SoSamples(sgfnTable.numRows());
-            for (size_t sampleIdx = 0; sampleIdx < sgfnTable.numRows(); ++ sampleIdx)
-                SoSamples[sampleIdx] = 1 - sgfnTable.getSgColumn()[sampleIdx];
+            // the situation for the gas phase is complicated that all saturations are
+            // shifted by the connate water saturation.
+            Scalar Swco = unscaledEpsInfo_[satnumRegionIdx].Swl;
 
-            effParams.setKrwSamples(SoColumn, sof3Table.getKrogColumn());
-            effParams.setKrnSamples(SoSamples, sgfnTable.getKrgColumn());
-            effParams.setPcnwSamples(SoSamples, sgfnTable.getPcogColumn());
+            const auto &sof3SoColumn = sof3Table.getSoColumn();
+            const auto &sgfnSgColumn = sgfnTable.getSgColumn();
+
+            // convert the saturations of the SGFN keyword from gas to oil saturations
+            std::vector<double> sgfnSoSamples(sgfnTable.numRows());
+            std::vector<double> sof3SoSamples(sof3SoColumn.size());
+            for (size_t sampleIdx = 0; sampleIdx < sgfnTable.numRows(); ++ sampleIdx) {
+                sgfnSoSamples[sampleIdx] = 1 - sgfnSgColumn[sampleIdx];
+                sof3SoSamples[sampleIdx] = sof3SoColumn[sampleIdx] + Swco;
+            }
+
+            effParams.setKrwSamples(sof3SoSamples, sof3Table.getKrogColumn());
+            effParams.setKrnSamples(sgfnSoSamples, sgfnTable.getKrgColumn());
+            effParams.setPcnwSamples(sgfnSoSamples, sgfnTable.getPcogColumn());
             effParams.finalize();
             break;
         }
@@ -644,16 +653,25 @@ private:
         {
             const auto& swfnTable = eclState->getSwfnTables()[satnumRegionIdx];
             const auto& sof3Table = eclState->getSof3Tables()[satnumRegionIdx];
-            const auto &SwColumn = swfnTable.getSwColumn();
+
+            const auto& swfnSwColumn = swfnTable.getSwColumn();
+            const auto& sof3SoColumn = sof3Table.getSoColumn();
+
+            // the situation for the gas phase is complicated that all saturations are
+            // shifted by the connate water saturation.
+            Scalar Swco = unscaledEpsInfo_[satnumRegionIdx].Swl;
 
             // convert the saturations of the SOF3 keyword from oil to water saturations
-            std::vector<double> SwSamples(sof3Table.numRows());
-            for (size_t sampleIdx = 0; sampleIdx < sof3Table.numRows(); ++ sampleIdx)
-                SwSamples[sampleIdx] = 1 - sof3Table.getSoColumn()[sampleIdx];
+            std::vector<double> swfnSwSamples(swfnTable.numRows());
+            std::vector<double> sof3SwSamples(sof3Table.numRows());
+            for (size_t sampleIdx = 0; sampleIdx < sof3Table.numRows(); ++ sampleIdx) {
+                swfnSwSamples[sampleIdx] = swfnSwColumn[sampleIdx];
+                sof3SwSamples[sampleIdx] = 1 - sof3SoColumn[sampleIdx] - Swco;
+            }
 
-            effParams.setKrwSamples(SwColumn, swfnTable.getKrwColumn());
-            effParams.setKrnSamples(SwSamples, sof3Table.getKrowColumn());
-            effParams.setPcnwSamples(SwColumn, swfnTable.getPcowColumn());
+            effParams.setKrwSamples(swfnSwSamples, swfnTable.getKrwColumn());
+            effParams.setKrnSamples(sof3SwSamples, sof3Table.getKrowColumn());
+            effParams.setPcnwSamples(swfnSwSamples, swfnTable.getPcowColumn());
             effParams.finalize();
             break;
         }
