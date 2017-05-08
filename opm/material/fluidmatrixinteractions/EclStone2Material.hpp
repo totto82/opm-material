@@ -65,7 +65,7 @@ public:
     typedef OilWaterMaterialLawT OilWaterMaterialLaw;
 
     // some safety checks
-    static_assert(TraitsT::numPhases == 3,
+    static_assert(TraitsT::numPhases >= 2,
                   "The number of phases considered by this capillary pressure "
                   "law is always three!");
     static_assert(GasOilMaterialLaw::numPhases == 2,
@@ -90,7 +90,7 @@ public:
     typedef ParamsT Params;
     typedef typename Traits::Scalar Scalar;
 
-    static const int numPhases = 3;
+    static const int numPhases = TraitsT::numPhases;
     static const int waterPhaseIdx = Traits::wettingPhaseIdx;
     static const int oilPhaseIdx = Traits::nonWettingPhaseIdx;
     static const int gasPhaseIdx = Traits::gasPhaseIdx;

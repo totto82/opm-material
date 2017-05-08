@@ -61,7 +61,7 @@ public:
     typedef OilWaterMaterialLawT OilWaterMaterialLaw;
 
     // some safety checks
-    static_assert(TraitsT::numPhases == 3,
+    static_assert(TraitsT::numPhases >= 2,
                   "The number of phases considered by this capillary pressure "
                   "law is always three!");
     static_assert(GasOilMaterialLaw::numPhases == 2,
@@ -79,7 +79,7 @@ public:
     typedef ParamsT Params;
     typedef typename Traits::Scalar Scalar;
 
-    static const int numPhases = 3;
+    static const int numPhases = TraitsT::numPhases;
     static const int waterPhaseIdx = Traits::wettingPhaseIdx;
     static const int oilPhaseIdx = Traits::nonWettingPhaseIdx;
     static const int gasPhaseIdx = Traits::gasPhaseIdx;
@@ -136,6 +136,7 @@ public:
                 FsToolbox::template decay<Evaluation>(fluidState.saturation(oilPhaseIdx));
 
             values[oilPhaseIdx] = 0.0;
+            assert( gasPhaseIdx >= 0 );
             values[gasPhaseIdx] = GasOilMaterialLaw::twoPhaseSatPcnw(params.gasOilParams(), So);
             break;
         }
@@ -154,6 +155,7 @@ public:
                 FsToolbox::template decay<Evaluation>(fluidState.saturation(waterPhaseIdx));
 
             values[waterPhaseIdx] = 0.0;
+            assert( gasPhaseIdx >= 0 );
             values[gasPhaseIdx] =
                 OilWaterMaterialLaw::twoPhaseSatPcnw(params.oilWaterParams(), Sw)
                 + GasOilMaterialLaw::twoPhaseSatPcnw(params.gasOilParams(), 0.0);
@@ -327,6 +329,7 @@ public:
                 FsToolbox::template decay<Evaluation>(fluidState.saturation(oilPhaseIdx));
 
             values[oilPhaseIdx] = GasOilMaterialLaw::twoPhaseSatKrw(params.gasOilParams(), So);
+            assert( gasPhaseIdx >= 0 );
             values[gasPhaseIdx] = GasOilMaterialLaw::twoPhaseSatKrn(params.gasOilParams(), So);
             break;
         }
@@ -345,6 +348,7 @@ public:
                 FsToolbox::template decay<Evaluation>(fluidState.saturation(waterPhaseIdx));
 
             values[waterPhaseIdx] = OilWaterMaterialLaw::twoPhaseSatKrw(params.oilWaterParams(), Sw);
+            assert( gasPhaseIdx >= 0 );
             values[gasPhaseIdx] = GasOilMaterialLaw::twoPhaseSatKrn(params.gasOilParams(), Sw);
             break;
         }

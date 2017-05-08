@@ -71,7 +71,7 @@ private:
     enum { gasPhaseIdx = Traits::gasPhaseIdx };
     enum { numPhases = Traits::numPhases };
 
-    typedef TwoPhaseMaterialTraits<Scalar, oilPhaseIdx, gasPhaseIdx> GasOilTraits;
+    typedef TwoPhaseMaterialTraits<Scalar, oilPhaseIdx, gasPhaseIdx>   GasOilTraits;
     typedef TwoPhaseMaterialTraits<Scalar, waterPhaseIdx, oilPhaseIdx> OilWaterTraits;
 
     // the two-phase material law which is defined on effective (unscaled) saturations

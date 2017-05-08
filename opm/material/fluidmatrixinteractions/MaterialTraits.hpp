@@ -48,6 +48,15 @@ public:
 
     //! The number of fluid phases
     static const int numPhases = numPhasesV;
+
+    //! The index of the wetting phase
+    static const int wettingPhaseIdx = -1;
+
+    //! The index of the non-wetting phase
+    static const int nonWettingPhaseIdx = -1;
+
+    //! The index of the gas phase (i.e., the least wetting phase)
+    static const int gasPhaseIdx = -1;
 };
 
 /*!
@@ -66,10 +75,13 @@ public:
     static const int numPhases = 2;
 
     //! The index of the wetting phase
-    static const int  wettingPhaseIdx = wettingPhaseIdxV;
+    static const int wettingPhaseIdx = wettingPhaseIdxV;
 
     //! The index of the non-wetting phase
     static const int nonWettingPhaseIdx = nonWettingPhaseIdxV;
+
+    //! The index of the gas phase (i.e., the least wetting phase)
+    static const int gasPhaseIdx = -1;//wettingPhaseIdxV; //nonWettingPhaseIdxV;
 
     // some safety checks...
     static_assert(wettingPhaseIdx != nonWettingPhaseIdx,
