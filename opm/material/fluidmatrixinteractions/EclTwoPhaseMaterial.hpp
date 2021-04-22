@@ -343,8 +343,8 @@ public:
             const Evaluation& Sw =
                 Opm::decay<Evaluation>(fluidState.saturation(waterPhaseIdx));
             
-            values[waterPhaseIdx] = GasWaterMaterialLaw::twoPhaseSatKrw(params.gasWaterParams(), Sw);
-            values[gasPhaseIdx] = GasWaterMaterialLaw::twoPhaseSatKrn(params.gasWaterParams(), Sw);
+            values[waterPhaseIdx] = Sw; //GasWaterMaterialLaw::twoPhaseSatKrw(params.gasWaterParams(), Sw);
+            values[gasPhaseIdx] = 1-Sw; //GasWaterMaterialLaw::twoPhaseSatKrn(params.gasWaterParams(), Sw);
 
             break;
         }
